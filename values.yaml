@@ -1,0 +1,396 @@
+###################################
+# Airflow - Common Configs
+###################################
+
+airflow:
+  image:
+    repository: apache/airflow
+    tag: 2.1.2-python3.8
+    ## values: Always or IfNotPresent
+    pullPolicy: IfNotPresent
+    pullSecret: ""
+    uid: 50000
+    gid: 50000
+
+  executor: KubernetesExecutor
+
+  config:
+    ##########################################
+    # logging configuration 
+    ##########################################
+    AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+
+    AIRFLOW__ELASTICSEARCH__WRITE_STDOUT: "True"
+    AIRFLOW__ELASTICSEARCH__WRITE_JSON: "True"
+    AIRFLOW__ELASTICSEARCH__JSON_FORMAT: "True"
+
+    AIRFLOW__ELASTICSEARCH__HOST: "elasticsearch.logging:9200"
+    AIRFLOW__ELASTICSEARCH__LOG_ID_TEMPLATE: "{dag_id}-{task_id}-{execution_date}-{try_number}"
+    AIRFLOW__ELASTICSEARCH__END_OF_LOG_MARK: "end_of_log"
+
+    AIRFLOW__WEBSERVER__BASE_URL: "http://myurl.mycompany.com/airflow"    
+    AIRFLOW__WEBSERVER__PAGE_SIZE: "20"
+
+
+    
+    LD_PRELOAD: "/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
+
+    AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+
+    AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__ELASTICSEARCH__WRITE_STDOUT: "True"
+    AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__ELASTICSEARCH__WRITE_JSON: "True"
+    AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__ELASTICSEARCH__JSON_FORMAT: "True"
+    AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__ELASTICSEARCH__HOST: "elasticsearch-master.logging:9200"
+    AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__ELASTICSEARCH__LOG_ID_TEMPLATE: "{dag_id}-{task_id}-{execution_date}-{try_number}"
+    AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__ELASTICSEARCH__END_OF_LOG_MARK: "end_of_log"    
+
+    AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__WEBSERVER__BASE_URL: "http://myurl.mycompany.com/airflow"    
+    AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__AIRFLOW__WEBSERVER__PAGE_SIZE: "20"
+
+    AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__LD_PRELOAD: "/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
+
+
+    
+    ###########################################
+    # kubernets executor configuration
+    ##########################################
+    AIRFLOW__KUBERNETES__DAGS_IN_IMAGE: "False"
+    AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY: "apache/airflow"
+    AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG: "2.1.2-python3.8"
+    AIRFLOW__KUBERNETES__RUN_AS_USER: "50000"
+    AIRFLOW__KUBERNETES__DELETE_WORKER_PODS: "True"
+    AIRFLOW__KUBERNETES__DELETE_WORKER_PODS_ON_FAILURE: "False"
+
+
+ingress:
+  ## if we should deploy Ingress resources
+  ##
+  enabled: true #false
+
+  ## the `apiVersion` to use for Ingress resources
+  ## - for Kubernetes 1.19 and later: "networking.k8s.io/v1"
+  ## - for Kubernetes 1.18 and before: "networking.k8s.io/v1beta1"
+  ##
+  apiVersion: networking.k8s.io/v1
+
+  ## configs for the Ingress of the web Service
+  ##
+  web:
+    ## annotations for the web Ingress
+    ##
+    annotations: {}
+
+    ## additional labels for the web Ingress
+    ##
+    labels: {}
+
+    ## the path for the web Ingress
+    ## - [WARNING] do NOT include the trailing slash (for root, set an empty string)
+    ##
+    ## ____ EXAMPLE _______________
+    ##   # webserver URL: http://example.com/airflow
+    ##   path: "/airflow"
+    ##
+    path: "/airflow"
+
+    ## the hostname for the web Ingress
+    ##
+    host: "myurl.mycompany.com"
+
+    ## configs for web Ingress TLS
+    ##
+    tls:
+      ## enable TLS termination for the web Ingress
+      ##
+      enabled: false
+
+      ## the name of a pre-created Secret containing a TLS private key and certificate
+      ##
+      secretName: ""
+
+    ## http paths to add to the web Ingress before the default path
+    ##
+    ## ____ EXAMPLE _______________
+    ##   precedingPaths:
+    ##     - path: "/*"
+    ##       serviceName: "my-service"
+    ##       servicePort: "port-name"
+    ##
+    precedingPaths: []
+
+    ## http paths to add to the web Ingress after the default path
+    ##
+    ## ____ EXAMPLE _______________
+    ##   succeedingPaths:
+    ##     - path: "/extra-service"
+    ##       serviceName: "my-service"
+    ##       servicePort: "port-name"
+    ##
+    succeedingPaths: []
+
+  ## configs for the Ingress of the flower Service
+  ##
+  flower:
+    ## annotations for the flower Ingress
+    ##
+    annotations: {}
+
+    ## additional labels for the flower Ingress
+    ##
+    labels: {}
+
+    ## the path for the flower Ingress
+    ## - [WARNING] do NOT include the trailing slash (for root, set an empty string)
+    ##
+    ## ____ EXAMPLE _______________
+    ##   # flower URL: http://example.com/airflow/flower
+    ##   path: "/airflow/flower"
+    ##
+    path: ""
+
+    ## the hostname for the flower Ingress
+    ##
+    host: ""
+
+    ## configs for flower Ingress TLS
+    ##
+    tls:
+      ## enable TLS termination for the flower Ingress
+      ##
+      enabled: false
+
+      ## the name of a pre-created Secret containing a TLS private key and certificate
+      ##
+      secretName: ""
+
+    ## http paths to add to the flower Ingress before the default path
+    ##
+    ## ____ EXAMPLE _______________
+    ##   precedingPaths:
+    ##     - path: "/*"
+    ##       serviceName: "my-service"
+    ##       servicePort: "port-name"
+    ##
+    precedingPaths: []
+
+    ## http paths to add to the flower Ingress after the default path
+    ##
+    ## ____ EXAMPLE _______________
+    ##   succeedingPaths:
+    ##     - path: "/extra-service"
+    ##       serviceName: "my-service"
+    ##       servicePort: "port-name"
+    ##
+    succeedingPaths: []
+
+web:
+  enabled: true
+  service:
+    type: NodePort
+    externalPort: 8080
+    nodePort:
+      http: 30808
+
+workers:
+  enabled: false
+
+flower:
+  enabled: false
+
+redis:
+  enabled: false
+
+###################################
+# Airflow - DAGs Configs
+###################################
+dags:
+  ## the airflow dags folder
+  ##
+  path: /opt/airflow/dags
+
+  ## whether to disable pickling dags from the scheduler to workers
+  ##
+  ## NOTE:
+  ## - sets AIRFLOW__CORE__DONOT_PICKLE
+  ##
+  doNotPickle: false
+
+  ## install any Python `requirements.txt` at the root of `dags.path` automatically
+  ##
+  ## WARNING:
+  ## - if set to true, and you are using `dags.git.gitSync`, you must also enable
+  ## `dags.initContainer` to ensure the requirements.txt is available at Pod start
+  ##
+  installRequirements: false
+
+  ## configs for the dags PVC
+  ##
+  persistence:
+    ## if a persistent volume is mounted at `dags.path`
+    ##
+    enabled: false
+
+    ## the name of an existing PVC to use
+    ##
+    existingClaim: ""
+
+    ## sub-path under `dags.persistence.existingClaim` to use
+    ##
+    subPath: ""
+
+    ## the name of the StorageClass used by the PVC
+    ##
+    ## NOTE:
+    ## - if set to "", then `PersistentVolumeClaim/spec.storageClassName` is omitted
+    ## - if set to "-", then `PersistentVolumeClaim/spec.storageClassName` is set to ""
+    ##
+    storageClass: ""
+
+    ## the access mode of the PVC
+    ##
+    ## WARNING:
+    ## - must be one of: `ReadOnlyMany` or `ReadWriteMany`
+    ##
+    ## NOTE:
+    ## - different StorageClass support different access modes:
+    ##   https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
+    ##
+    accessMode: ReadOnlyMany
+
+    ## the size of PVC to request
+    ##
+    size: 1Gi
+    
+
+  ## configs for the git-sync sidecar (https://github.com/kubernetes/git-sync)
+  ##
+  gitSync:
+    ## if the git-sync sidecar container is enabled
+    ##
+    enabled: true
+
+    ## the git-sync container image
+    ##
+    image:
+      repository: k8s.gcr.io/git-sync/git-sync
+      tag: v3.2.2
+      ## values: Always or IfNotPresent
+      pullPolicy: IfNotPresent
+      uid: 65533
+      gid: 65533
+
+    ## resource requests/limits for the git-sync container
+    ##
+    ## EXAMPLE:
+    ##   resources:
+    ##     requests:
+    ##       cpu: "50m"
+    ##       memory: "64Mi"
+    ##
+    resources: {}
+
+    ## the url of the git repo
+    ##
+    ## EXAMPLE - HTTPS:
+    ##    repo: "https://github.com/USERNAME/REPOSITORY.git"
+    ##
+    ## EXAMPLE - SSH:
+    ##    repo: "git@github.com:USERNAME/REPOSITORY.git"
+    ##
+    repo: "https://user:password@mygit_url.com/path/to/dag/repo"
+
+    ## the sub-path (within your repo) where dags are located
+    ##
+    ## NOTE:
+    ## - only dags under this path (within your repo) will be seen by airflow,
+    ##   but the full repo will be cloned
+    ##
+    repoSubPath: ""
+
+    ## the git branch to check out
+    ##
+    branch: master
+
+    ## the git revision (tag or hash) to check out
+    ##
+    revision: HEAD
+
+    ## shallow clone with a history truncated to the specified number of commits
+    ##
+    depth: 1
+
+    ## the number of seconds between syncs
+    ##
+    syncWait: 60
+
+    ## the max number of seconds allowed for a complete sync
+    ##
+    syncTimeout: 120
+
+    ## the name of a pre-created Secret with git http credentials
+    ##
+    httpSecret: ""
+
+    ## the key in `dags.gitSync.httpSecret` with your git username
+    ##
+    httpSecretUsernameKey: ""
+
+    ## the key in `dags.gitSync.httpSecret` with your git password/token
+    ##
+    httpSecretPasswordKey: ""
+
+    ## the name of a pre-created Secret with git ssh credentials
+    ##
+    sshSecret: ""
+
+    ## the key in `dags.gitSync.sshSecret` with your ssh-key file
+    ##
+    sshSecretKey: ""
+
+    ## the string value of a "known_hosts" file (for SSH only)
+    ##
+    ## WARNING:
+    ## - known_hosts verification will be disabled if left empty, making you more
+    ##   vulnerable to repo spoofing attacks
+    ##
+    ## EXAMPLE:
+    ##    sshKnownHosts: |-
+    ##      <HOST_NAME> ssh-rsa <HOST_KEY>
+    ##
+    sshKnownHosts: ""
+
+    ## the number of consecutive failures allowed before aborting
+    ##
+    ## NOTE:
+    ##  - the first sync must succeed
+    ##  - a value of -1 will retry forever after the initial sync
+    ##
+    maxFailures: 0
+
+postgresql:
+  ## configs for the PVC of postgresql
+  ##
+  persistence:
+    ## if postgres will use Persistent Volume Claims to store data
+    ##
+    ## WARNING:
+    ## - if false, data will be LOST as postgres Pods restart
+    ##
+    enabled: true
+
+    ## the name of the StorageClass used by the PVC
+    ##
+    storageClass: ""
+
+    ## the access modes of the PVC
+    ##
+    accessModes:
+      - ReadWriteOnce
+
+    ## the size of PVC to request
+    ##
+    size: 10Gi
+
+
+
+
