@@ -15,7 +15,7 @@ NAMESPACE=air
 CHART_VERSION=8.4.0
 VALUES_FILE=./values.yaml
 
-#helm repo add airflow-stable https://airflow-helm.github.io/charts
-#helm repo update
+helm repo add airflow-stable https://airflow-helm.github.io/charts
+helm repo update
 helm install $RELEASE_NAME airflow-stable/airflow --create-namespace --namespace $NAMESPACE --version $CHART_VERSION --values $VALUES_FILE
 ```
